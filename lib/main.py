@@ -36,7 +36,6 @@ while running:
             running = False
 
     screen.fill(WHITE)
-
     delivery_order = map.get_delivery_order(fix_grid, GRID_SIZE)
     map.move_drone(screen, fix_grid, path, GRID_SIZE, CELL_SIZE)
 

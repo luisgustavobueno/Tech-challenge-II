@@ -26,11 +26,11 @@ def draw_grid(screen, grid, GRID_SIZE, CELL_SIZE):
     for y in range(GRID_SIZE):
         for x in range(GRID_SIZE):
             rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-            if grid[y][x] == MapInfo.OBSTACLE: 
+            if grid[y][x] == MapInfo.OBSTACLE.value: 
                 pygame.draw.rect(screen, BLACK, rect)
-            elif grid[y][x] == MapInfo.DESTINATION: 
+            elif grid[y][x] == MapInfo.DESTINATION.value: 
                 pygame.draw.rect(screen, GREEN, rect)           
-            elif grid[y][x] == MapInfo.DRONE_POSITION:  
+            elif grid[y][x] == MapInfo.DRONE_POSITION.value:  
                 pygame.draw.rect(screen, BLUE, rect)
             else:  
                 pygame.draw.rect(screen, WHITE, rect)
@@ -40,10 +40,10 @@ def move_drone(screen, grid, path, GRID_SIZE, CELL_SIZE):
     for pos in path:
         for y in range(GRID_SIZE):
             for x in range(GRID_SIZE):
-                if grid[y][x] == MapInfo.DRONE_POSITION:
-                    grid[y][x] = MapInfo.FREE_PATH
+                if grid[y][x] == MapInfo.DRONE_POSITION.value:
+                    grid[y][x] = MapInfo.FREE_PATH.value
 
-        grid[pos[0]][pos[1]] = MapInfo.DRONE_POSITION
+        grid[pos[0]][pos[1]] = MapInfo.DRONE_POSITION.value
         
         draw_grid(screen, grid, GRID_SIZE, CELL_SIZE)
         pygame.display.flip()
@@ -53,9 +53,9 @@ def move_drone(screen, grid, path, GRID_SIZE, CELL_SIZE):
 def get_delivery_order(grid, GRID_SIZE):
     for y in range(GRID_SIZE):
         for x in range(GRID_SIZE):
-            if grid[x][y] == MapInfo.DRONE_POSITION:
+            if grid[x][y] == MapInfo.DRONE_POSITION.value:
                 start_position = [x, y]
-            if grid[x][y] == MapInfo.DESTINATION:
+            if grid[x][y] == MapInfo.DESTINATION.value:
                 delivery_points.append([x, y]) 
 
     distancias = [(point, calculate_distance(start_position, point)) for point in delivery_points]
