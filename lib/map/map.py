@@ -11,6 +11,7 @@ class DroneSimulation:
     GREEN = (0, 255, 0)
     BLUE = (0, 0, 255)
     ORANGE = (255, 165, 0)
+    SLEEP = 0.1
 
     class MAPINFO(Enum):
         OBSTACLE = 1
@@ -40,7 +41,7 @@ class DroneSimulation:
                     pygame.draw.rect(screen, self.WHITE, rect)
                 pygame.draw.rect(screen, self.RED, rect, 1)
         pygame.display.flip()
-        time.sleep(0.5)
+        time.sleep(self.SLEEP)
 
     def move_drone(self, screen, target):
         #for pos in path:
