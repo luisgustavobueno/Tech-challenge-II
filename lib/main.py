@@ -21,18 +21,18 @@ fix_grid = [
 ]
 
 fix_grid_II = [
-    [0, 0, 0, 0, 0, 0, 0, 2],
+    [2, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 2, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 3, 0, 0, 2],  # Drone começa no meio
-    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 2, 0, 0, 0, 2, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [2, 0, 0, 0, 0, 0, 0, 0]
 ]
 
 
-path = [(4, 4), (5, 4), (6, 4), (7, 4), (7, 5), (7, 6), (7, 7)]  
+#path = [(4, 4), (5, 4), (6, 4), (7, 4), (7, 5), (7, 6), (7, 7)]  
 
 drone_simulation = map.DroneSimulation(GRID_SIZE, CELL_SIZE)
 drone_simulation.grid = fix_grid_II
@@ -52,6 +52,7 @@ while running:
     for delivery_point in delivery_order:
         if delivery_point['visited'] == False:
             running = drone_simulation.move_drone(screen, delivery_point['position'])
+            delivery_point['visited'] = True
 
     running = False  
 

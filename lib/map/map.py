@@ -39,6 +39,8 @@ class DroneSimulation:
                 else:
                     pygame.draw.rect(screen, self.WHITE, rect)
                 pygame.draw.rect(screen, self.RED, rect, 1)
+        pygame.display.flip()
+        time.sleep(0.5)
 
     def move_drone(self, screen, target):
         #for pos in path:
@@ -51,15 +53,11 @@ class DroneSimulation:
 
             new_position = self.sort_position_to_move(drone_position, target)
             self.grid[new_position[0]][new_position[1]] = self.MAPINFO.DRONE_POSITION.value
+
             self.draw_grid(screen)
-            pygame.display.flip()
-            if new_position == target:
-                time.sleep(0.5)
-                return False
             
-
-            time.sleep(0.5)
-
+            if new_position == target:
+                return False
 
     @staticmethod
     def clamp_value(value, min_value, max_value):
@@ -78,17 +76,15 @@ class DroneSimulation:
             value_of_position = self.grid[new_position[0]][new_position[1]]
 
             if value_of_position != self.MAPINFO.OBSTACLE.value:
-                distance = self.is_new_position_closer(new_position, old_position, target)
-                if distance == True:
-                    break
+                new_distance = self.is_new_position_closer(new_position, old_position, target)
+                if new_distance == True:
+                    print(f"Nova posição: {new_position}")
+                    return new_position                   
                 else:
                     new_position = actual_position.copy()
             else:
                 new_position = actual_position.copy()
 
-        print(f"Nova posição: {new_position}")
-        return new_position
-    
     def calculate_distance(self, point1, point2):
         return math.sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
 
