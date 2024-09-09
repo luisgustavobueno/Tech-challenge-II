@@ -39,28 +39,33 @@ class DroneSimulation:
                 else:
                     pygame.draw.rect(screen, self.WHITE, rect)
                 pygame.draw.rect(screen, self.RED, rect, 1)
+        pygame.display.flip()
+        time.sleep(0.5)
 
-    def move_drone(self, screen, path):
-        for pos in path:
+    def move_drone(self, screen, target):
+        #for pos in path:
+        while True:
             for y in range(self.grid_size):
                 for x in range(self.grid_size):
                     if self.grid[y][x] == self.MAPINFO.DRONE_POSITION.value:
                         self.grid[y][x] = self.MAPINFO.FREE_PATH.value
                         drone_position = [y, x]
 
-            new_position = self.sort_position_to_move(drone_position)
+            new_position = self.sort_position_to_move(drone_position, target)
             self.grid[new_position[0]][new_position[1]] = self.MAPINFO.DRONE_POSITION.value
 
             self.draw_grid(screen)
-            pygame.display.flip()
-            time.sleep(0.3)
+            
+            if new_position == target:
+                return False
 
     @staticmethod
     def clamp_value(value, min_value, max_value):
         return max(min_value, min(value, max_value))
 
-    def sort_position_to_move(self, actual_position):
+    def sort_position_to_move(self, actual_position, target):
         new_position = actual_position.copy()  
+        old_position = actual_position.copy()
         while True:
             change_x_or_y = random.randint(0, 1)
             value_to_change = random.choice([-1, 1])
@@ -71,14 +76,26 @@ class DroneSimulation:
             value_of_position = self.grid[new_position[0]][new_position[1]]
 
             if value_of_position != self.MAPINFO.OBSTACLE.value:
-                break
+                new_distance = self.is_new_position_closer(new_position, old_position, target)
+                if new_distance == True:
+                    print(f"Nova posição: {new_position}")
+                    return new_position                   
+                else:
+                    new_position = actual_position.copy()
             else:
                 new_position = actual_position.copy()
 
-        print(f"Nova posição: {new_position}")
-        return new_position
+    def calculate_distance(self, point1, point2):
+        return math.sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
 
+    def is_new_position_closer (self, new_position, old_position, target):
+        old_position_distance = self.calculate_distance(old_position, target)
+        new_position_distance = self.calculate_distance(new_position, target)
 
+        if (new_position_distance < old_position_distance):
+            return True
+        else:
+            return False
 
     def get_delivery_order(self):
         for y in range(self.grid_size):
@@ -88,11 +105,9 @@ class DroneSimulation:
                 if self.grid[x][y] == self.MAPINFO.DESTINATION.value:
                     self.delivery_points.append([x, y])
 
-        distancias = [(point, self.calculate_distance(self.start_position, point)) for point in self.delivery_points]
-        distancias.sort(key=lambda x: x[1])
+        distances = [(point, self.calculate_distance(self.start_position, point)) for point in self.delivery_points]
+        distances.sort(key=lambda x: x[1])
 
-        return [point for point, _ in distancias]
+        return [point for point, _ in distances]
 
-    @staticmethod
-    def calculate_distance(point1, point2):
-        return math.sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
+
