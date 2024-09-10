@@ -1,13 +1,6 @@
-import pygame
-import time
-from map import map  
-CELL_SIZE = 40
-GRID_SIZE = 16
+from src.map.drone_simulation import DroneSimulation
+from src.util.engine import Engine
 
-WHITE = (255, 255, 255)
-
-pygame.init()
-screen = pygame.display.set_mode((GRID_SIZE * CELL_SIZE + 300, GRID_SIZE * CELL_SIZE))
 
 fix_grid_with_obstacle = [
     [0, 0, 0, 1, 0, 0, 0, 0],
@@ -25,7 +18,7 @@ fix_grid_without_obstacle = [
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 2, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 3, 0, 0, 2],  
+    [0, 0, 0, 0, 3, 0, 0, 2],
     [0, 2, 0, 0, 0, 2, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [2, 0, 0, 0, 0, 0, 0, 0]
@@ -42,7 +35,7 @@ fix_grid_without_obstacleII = [
     [2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 3, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0],  
+    [0, 0, 0, 0, 3, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0],
@@ -61,7 +54,7 @@ fix_grid_with_obstacleII = [
     [2, 0, 0, 0, 0, 0, 1, 0, 2, 0, 0, 0, 0, 1, 0, 0],
     [0, 0, 2, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1],
     [0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
-    [0, 0, 0, 0, 3, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0], 
+    [0, 0, 0, 0, 3, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0],
     [0, 2, 0, 1, 0, 2, 0, 1, 0, 2, 0, 0, 1, 2, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
     [2, 0, 1, 0, 0, 0, 1, 0, 2, 0, 0, 0, 0, 0, 1, 0],
@@ -70,30 +63,30 @@ fix_grid_with_obstacleII = [
 ]
 
 
+# path = [(4, 4), (5, 4), (6, 4), (7, 4), (7, 5), (7, 6), (7, 7)]
 
+CELL_SIZE = 40
+GRID_SIZE = 16
+WIDTH = GRID_SIZE * CELL_SIZE + 300
+HEIGHT = GRID_SIZE * CELL_SIZE
+engine = Engine(width=WIDTH, height=HEIGHT)
 
-#path = [(4, 4), (5, 4), (6, 4), (7, 4), (7, 5), (7, 6), (7, 7)]  
-
-drone_simulation = map.DroneSimulation(GRID_SIZE, CELL_SIZE)
+# Setup drone simulation scenario
+drone_simulation = DroneSimulation(
+    grid_size=GRID_SIZE,
+    cell_size=CELL_SIZE
+)
 drone_simulation.grid = fix_grid_with_obstacleII
 
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+# Setup deliveries
+# delivery_order = drone_simulation.get_delivery_order()
+# for delivery_point in delivery_order:
+#     if not delivery_point['visited']:
+#         running = drone_simulation.move_drone(
+#             screen=self.screen,
+#             target=delivery_point['position']
+#         )
+#         delivery_point['visited'] = True
 
-    screen.fill(WHITE)
-    
-    delivery_order = drone_simulation.get_delivery_order()
-    delivery_order = [{'position': point, 'visited': False} for point in delivery_order]
-    drone_simulation.delivery_order = delivery_order 
-
-    for delivery_point in delivery_order:
-        if delivery_point['visited'] == False:
-            running = drone_simulation.move_drone(screen, delivery_point['position'])
-            delivery_point['visited'] = True
-
-    running = False  
-
-pygame.quit()
+# Render problem in pygame
+engine.run(drone_simulation=drone_simulation)
