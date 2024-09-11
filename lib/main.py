@@ -9,8 +9,8 @@ from simulation import DroneSimulation
 CELL_SIZE = 40
 GRID_SIZE = len(grid_default)
 
-POPULATION_SIZE = 10
-N_GENERATIONS = 10
+POPULATION_SIZE = 100
+N_GENERATIONS = 100
 MUTATION_PROBABILITY = 0.5
 
 FPS = 30
