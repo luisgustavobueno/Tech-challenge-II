@@ -6,6 +6,8 @@ GRID_SIZE = 16
 
 WHITE = (255, 255, 255)
 
+POPULATION_SIZE = 3
+
 pygame.init()
 screen = pygame.display.set_mode((GRID_SIZE * CELL_SIZE + 300, GRID_SIZE * CELL_SIZE))
 
@@ -54,7 +56,7 @@ fix_grid_with_obstacleII = [
     [2, 0, 0, 1, 2, 0, 1, 0, 2, 0, 0, 1, 2, 0, 0, 0],
     [0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0],
     [0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1, 0],
-    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
     [1, 0, 0, 0, 0, 1, 0, 2, 0, 0, 0, 0, 1, 0, 0, 2],
     [0, 2, 1, 0, 0, 2, 0, 0, 1, 2, 0, 0, 0, 2, 0, 1],
     [0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -70,12 +72,9 @@ fix_grid_with_obstacleII = [
 ]
 
 
-
-
-#path = [(4, 4), (5, 4), (6, 4), (7, 4), (7, 5), (7, 6), (7, 7)]  
-
 drone_simulation = map.DroneSimulation(GRID_SIZE, CELL_SIZE)
-drone_simulation.grid = fix_grid_with_obstacleII
+drone_simulation.grid = fix_grid_without_obstacleII
+population = drone_simulation.generate_population(screen, POPULATION_SIZE)
 
 running = True
 while running:
