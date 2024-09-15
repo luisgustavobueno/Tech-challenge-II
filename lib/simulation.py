@@ -1,133 +1,197 @@
+from time import sleep
+from typing import List, Tuple
 import pygame
 import random
 import math
-import time
+# import time
 from enum import Enum
-from colors import WHITE, BLACK, RED, GREEN, BLUE
+from colors import ORANGE, WHITE, BLACK, RED, GREEN, BLUE
+
+
+class MAPINFO(Enum):
+    OBSTACLE = 1
+    DESTINATION = 2
+    DRONE_POSITION = 3
+    FREE_PATH = 4
+
 
 class DroneSimulation:
-    SLEEP = 0.5
+    SLEEP: float
+    grid_size: int
+    cell_size: int
+    grid: List[List[int]]
+    start_position: Tuple[int, int]
+    delivery_points: List[Tuple[int, int]]
+    population: List[List[Tuple[int, int]]]
 
-    class MAPINFO(Enum):
-        OBSTACLE = 1
-        DESTINATION = 2
-        DRONE_POSITION = 3
-        FREE_PATH = 4
-
-    def __init__(self, grid_size, cell_size, grid):
+    def __init__(self, grid_size: int, cell_size: int, grid: List[List[int]]):
+        self.SLEEP = 0.5
         self.grid_size = grid_size
         self.cell_size = cell_size
         self.grid = grid
-        self.grid_cells_count = grid_size * grid_size
-        self.start_position, self.end_position, self.delivery_points = self.set_delivery_points()
+        self.start_position, self.delivery_points = self.set_delivery_points()
         self.population = []
-        self.population_distances = []
 
     @staticmethod
     def clamp_value(value, min_value, max_value):
         return max(min_value, min(value, max_value))
 
     @staticmethod
-    def calculate_distance(point1, point2):
+    def calculate_distance(point1: Tuple[int, int], point2: Tuple[int, int]) -> float:
         return math.sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
 
-    def draw_routes(self, screen):
+    def move_drone_to(self, pos: Tuple[int, int]):
+        if abs(self.start_position[0] - pos[0]) > 1:
+            print(f"Moving more than one house horizontally:\npos: {pos}\nstart_position:{self.start_position}")
+            return
+        if abs(self.start_position[1] - pos[1]) > 1:
+            print(f"Moving more than one house vertically:\npos: {pos}\nstart_position:{self.start_position}")
+            return
+
+        if pos == self.start_position:
+            return
+
+        if self.grid[pos[0]][pos[1]] == MAPINFO.OBSTACLE.value:
+            return
+
+        if self.grid[pos[0]][pos[1]] == MAPINFO.DESTINATION.value:
+            found_index = self.delivery_points.index(pos)
+            found_delivery_point = self.delivery_points.pop(found_index)
+            print(f'Delivered {found_index+1}º delivery point at {found_delivery_point}')
+            print(f'Pending deliveries {self.delivery_points}')
+
+        self.grid[pos[0]][pos[1]] = MAPINFO.DRONE_POSITION.value
+        self.grid[self.start_position[0]][self.start_position[1]] = MAPINFO.FREE_PATH.value
+        print(f'Moving from {self.start_position} to {pos}')
+        self.start_position = (pos[0], pos[1])
+
+    def draw_routes(self, screen: pygame.Surface):
+        # Clear grid
+        WIDTH = screen.get_width()
+        HEIGHT = screen.get_width()
+        screen.fill(RED)
+        screen.fill(WHITE, (WIDTH-299, 0, 300, HEIGHT))
+
+        # Draw matrix
         for route in self.population:
+            count = 1
             for y in range(self.grid_size):
                 for x in range(self.grid_size):
-                    # print('route', route, '[y][x]', y, x)
-                    rect = pygame.Rect(x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
-                    if self.grid[y][x] == self.MAPINFO.OBSTACLE.value:
+                    # print('route', route, '[x][y]', x, y)
+                    left = x * self.cell_size + 1
+                    top = y * self.cell_size + 1
+                    width = self.cell_size - 1
+                    height = self.cell_size - 1
+                    rect = pygame.Rect(left, top, width, height)
+                    if self.grid[x][y] == MAPINFO.OBSTACLE.value:
                         pygame.draw.rect(screen, BLACK, rect)
-                    elif self.grid[y][x] == self.MAPINFO.DESTINATION.value:
+                        continue
+
+                    if self.grid[x][y] == MAPINFO.DESTINATION.value:
                         pygame.draw.rect(screen, GREEN, rect)
-                    elif (y, x) in route:
-                        pygame.draw.rect(screen, BLUE, rect)
-                    else:
-                        pygame.draw.rect(screen, WHITE, rect)
-                    pygame.draw.rect(screen, RED, rect, 1)
+                        continue
 
-            pygame.display.flip()
-            time.sleep(self.SLEEP)
+                    if (x, y) in route:
+                        _c = BLUE
+                        _c.a = min(255, 10800 // count)
+                        count += 1
+                        pygame.draw.rect(screen, _c, rect)
+                        continue
 
-    def set_delivery_points(self):
+                    pygame.draw.rect(screen, WHITE, rect)
+        # pygame.display.flip()
+
+    def draw_drone(self, screen: pygame.Surface):
+        # Draw drone
+        x, y = self.start_position
+        rect = pygame.Rect(x * self.cell_size+10, y * self.cell_size+10, self.cell_size-20, self.cell_size-20)
+        pygame.draw.rect(screen, ORANGE, rect)
+        # pygame.display.flip()
+
+    def set_delivery_points(self) -> Tuple[Tuple[int, int], List[Tuple[int, int]]]:
         delivery_points = []
         start_position = None
-        end_position = None
 
-        for y in range(self.grid_size):
-            for x in range(self.grid_size):
-                if self.grid[x][y] == self.MAPINFO.DRONE_POSITION.value:
+        for x in range(self.grid_size):
+            for y in range(self.grid_size):
+                if self.grid[x][y] == MAPINFO.DRONE_POSITION.value:
                     start_position = (x, y)
-                if self.grid[x][y] == self.MAPINFO.DESTINATION.value:
+                if self.grid[x][y] == MAPINFO.DESTINATION.value:
                     delivery_points.append((x, y))
 
-        end_position = delivery_points.pop()
-        print('delivery_points', delivery_points)
+        if start_position is None:
+            raise Exception("Could not find start position")
 
-        return start_position, end_position, delivery_points
+        return start_position, delivery_points
 
-    def get_next_position(self, current_position, target_position):
-        old_position = list(current_position)
-        new_position = list(current_position)
+    def get_next_position(self, current_position: Tuple[int, int], target_position: Tuple[int, int]) -> Tuple[int, int]:
+        possible_movements = [
+            (current_position[0]-1, current_position[1]),  # Left
+            (current_position[0], current_position[1]-1),  # Top
+            (current_position[0] + 1, current_position[1]),  # Right
+            (current_position[0], current_position[1] + 1),  # Bottom
+        ]
+        possible_movements = [
+            move
+            for move in possible_movements
+            if (
+                 move[0] <= self.grid_size -1 and
+                 move[0] >= 0 and
+                 move[1] <= self.grid_size -1 and
+                 move[1] >= 0 and
+                 self.grid[move[0]][move[1]] != MAPINFO.OBSTACLE.value
+            )
+        ]
+        best_move = possible_movements[0]
+        best_distance = self.calculate_distance(possible_movements[0], target_position)
+        for move in possible_movements[1:]:
+            distance = self.calculate_distance(move, target_position)
+            if distance < best_distance:
+                best_move = move
+                best_distance = distance
+        
+        print({
+            "current_position": current_position,
+            "possible_movements": possible_movements,
+            "best_move": best_move
+        })
+        return best_move
 
-        # greedy algorithm - we are not going to consider all the possible cells
-        while True:
-            x_or_y = random.randint(0, 1) # 0 = x, 1 = y
-            direction = random.choice([-1, 1]) # -1 = left or up, 1 = right or down
-
-            new_position[x_or_y] += direction
-            new_position[x_or_y] = self.clamp_value(new_position[x_or_y], 0, self.grid_size - 1)
-
-            # not considering obstacles initially
-            old_position_distance = self.calculate_distance(old_position, target_position)
-            new_position_distance = self.calculate_distance(new_position, target_position)
-            if new_position_distance < old_position_distance:
-                return tuple(new_position), new_position_distance
-
-            new_position = list(current_position)
-
-    def calculate_path(self, start_position, target_position):
+    def calculate_path(self, start_position: Tuple[int, int], target_position: Tuple[int, int]) -> List[Tuple[int, int]]:
         path = []
         current_position = start_position
-        path_distance = 0
 
         while current_position != target_position:
-            next_position, distance = self.get_next_position(current_position, target_position)
+            next_position = self.get_next_position(current_position, target_position)
             path.append(next_position)
             current_position = next_position
-            path_distance += distance
 
-        return path, path_distance
+        return path
 
-    def generate_random_population(self, population_size):
-        self.population = []
-        self.population_distances = []
+    def calculate_fitness(self, path: List[Tuple[int, int]]) -> float:
+        fitness = 0.0
 
-        while len(self.population) < population_size:
-            random_delivery_points = self.delivery_points.copy()
-            random.shuffle(random_delivery_points)
+        for i in range(len(path)-1):
+            point_a = path[i]
+            point_b = path[i+1]
+            fitness += DroneSimulation.calculate_distance(point_a, point_b)
 
-            # keep the start and end position
-            random_delivery_points.insert(0, self.start_position)
-            random_delivery_points.append(self.end_position)
-            print('random_delivery_points', random_delivery_points)
+        return fitness
 
-            route = []
-            route_distance = 0
-            # for each delivery point, we calculate the path between the previous position and the delivery point
-            for i in range(1, len(random_delivery_points)):
-                path, path_distance = self.calculate_path(random_delivery_points[i - 1], random_delivery_points[i])
-                route.extend(path)
-                route_distance += path_distance
+    def generate_random_population(self, population_size: int) -> List[List[Tuple[int, int]]]:
+        population = []
+        population_distances = []
 
-            route.insert(0, self.start_position)
-            route.append(self.end_position)
-            print('route', route[0:10], 'len', len(route))
+        while len(population) < population_size:
+            random_delivery_point = random.choice(self.delivery_points)
+            path = self.calculate_path(
+                start_position=self.start_position,
+                target_position=random_delivery_point
+            )
+            path_distance = self.calculate_fitness(path)
+            population.append(path)
+            population_distances.append(path_distance)
 
-            self.population.append(route)
-            self.population_distances.append(route_distance)
+        population = [p[0] for p in sorted(zip(population, population_distances), key=lambda x: x[1])]
 
-        print('self.population', self.population[0][0:10], 'len', len(self.population))
-        print('self.population_distances', self.population_distances)
-        return self.population
+        return population

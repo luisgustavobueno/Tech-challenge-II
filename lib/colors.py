@@ -1,6 +1,9 @@
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-ORANGE = (255, 165, 0)
+from pygame.color import Color
+
+
+WHITE = Color((255, 255, 255))
+BLACK = Color((0, 0, 0))
+RED = Color((255, 0, 0))
+GREEN = Color((0, 255, 0))
+BLUE = Color((0, 0, 255))
+ORANGE = Color((255, 165, 0))
