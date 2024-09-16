@@ -1,17 +1,18 @@
 from random import choice, choices, randint
 import sys
 import time
+from typing import List, Tuple
 import pygame
 import itertools
 from colors import WHITE
 from grid import grid_default
-from crossover import order_crossover
+from crossover import order_crossover, two_point_crossover
 from simulation import DroneSimulation
 
 CELL_SIZE = 40
 GRID_SIZE = len(grid_default)
 
-POPULATION_SIZE = 10
+POPULATION_SIZE = 3
 N_GENERATIONS = 100
 MUTATION_PROBABILITY = 0.5
 
@@ -32,7 +33,7 @@ population = drone_simulation.generate_random_population(POPULATION_SIZE)
 drone_simulation.population = population
 
 best_fitness_values = []
-best_solutions = []
+best_solutions: List[List[Tuple[int, int]]] = []
 
 running = True
 while running:
@@ -59,8 +60,8 @@ while running:
         fitness = drone_simulation.calculate_fitness(population[i])
         if fitness >= best_fitness:
             continue
-        best_fitness = fitness
         best_solution = population[i]
+        best_fitness = fitness
 
     best_fitness_values.append(best_fitness)
     best_solutions.append(best_solution)
@@ -70,14 +71,12 @@ while running:
 
     while len(new_population) < POPULATION_SIZE:
         # Selection - Pick at random
-        index_a = randint(0, len(population)-1)
-        index_b = choice([i for i in range(len(population)) if i != index_a])
-
         selected_a, selected_b = choices(population, k=2)
 
         # Crossover
         # path = selected_a[:]
         path = order_crossover(selected_a, selected_b)
+        # path = two_point_crossover(selected_a, selected_b)
 
         # TODO mutation - Swap neighbor points(makes sense? drone should not move more than one house per draw)
         # should_mutate = randint(0, 1)
@@ -90,7 +89,8 @@ while running:
         new_population.append(path)
 
     drone_simulation.population = new_population
-    drone_simulation.move_drone_to(best_solutions[-1][0])
+    for move in best_solution:
+        drone_simulation.move_drone_to(move)
     drone_simulation.draw_routes(screen)
     drone_simulation.draw_drone(screen)
     pygame.display.flip()

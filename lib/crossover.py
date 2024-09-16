@@ -2,6 +2,18 @@ from random import randint
 from typing import List, Tuple
 
 
+def two_point_crossover(
+    path_a: List[Tuple[int, int]],
+    path_b: List[Tuple[int, int]]
+) -> List[Tuple[int, int]]:
+    start_index = randint(0, len(path_a)-1)
+    end_index = randint(start_index+1, len(path_a))
+
+    new_path = path_a[:]
+    new_path[start_index:end_index] = path_b[start_index:end_index]
+    return new_path
+
+
 def order_crossover(
     path_a: List[Tuple[int, int]],
     path_b: List[Tuple[int, int]]
