@@ -16,7 +16,7 @@ POPULATION_SIZE = 10
 N_GENERATIONS = 1000
 MUTATION_PROBABILITY = 0.5
 
-FPS = 1
+FPS = 30
 
 pygame.init()
 WIDTH = GRID_SIZE * CELL_SIZE + 300
@@ -51,6 +51,7 @@ while running:
     if generation >= N_GENERATIONS:
         running = False
 
+    print('Generation', generation)
     screen.fill(WHITE)
 
     # we could check the population_distances to get the best solutions with shortest distance
@@ -89,7 +90,7 @@ while running:
         #     path[index_to_mutate] = path[index_to_mutate+1]
         #     path[index_to_mutate+1] = aux
 
-        print('>', path)
+        # print('>', path)
         new_population.append(path)
 
     drone_simulation.population = new_population
