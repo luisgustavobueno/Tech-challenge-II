@@ -1,10 +1,8 @@
-from time import sleep
 from typing import List, Tuple
 import pygame
 import random
 import math
-# import time
-from colors import ORANGE, WHITE, BLACK, RED, GREEN, BLUE
+from colors import ORANGE, WHITE, BLACK, RED, GREEN
 
 class MOVE:
     UP = (0, -1)
@@ -24,6 +22,17 @@ class MAPINFO:
     DRONE_POSITION = 3
     FREE_PATH = 4
 
+
+AVAILABLE_MOVEMENTS = [
+    MOVE.LEFT,
+    MOVE.UP,
+    MOVE.RIGHT,
+    MOVE.DOWN,
+    # MOVE.TOP_LEFT,
+    # MOVE.TOP_RIGHT,
+    # MOVE.BOTTOM_LEFT,
+    # MOVE.BOTTOM_RIGHT,
+]
 
 class DroneSimulation:
     SLEEP: float
@@ -129,20 +138,10 @@ class DroneSimulation:
 
         return start_position, delivery_points
 
-    def get_best_move(self, position: Tuple[int, int], target: Tuple[int, int]) -> Tuple[int, int]:
-        available_movements = [
-            MOVE.LEFT,
-            MOVE.UP,
-            MOVE.RIGHT,
-            MOVE.DOWN,
-            # MOVE.TOP_LEFT,
-            # MOVE.TOP_RIGHT,
-            # MOVE.BOTTOM_LEFT,
-            # MOVE.BOTTOM_RIGHT,
-        ]
+    def get_random_move(self, position: Tuple[int, int]) -> Tuple[int, int]:
         possible_movements = [
             move
-            for move in available_movements
+            for move in AVAILABLE_MOVEMENTS
             if (
                  position[0]+move[0] <= self.grid_size -1 and
                  position[0]+move[0] >= 0 and
@@ -154,6 +153,19 @@ class DroneSimulation:
 
         # Pick random possible move
         return random.choice(possible_movements)
+
+    def get_best_move(self, position: Tuple[int, int], target: Tuple[int, int]) -> Tuple[int, int]:
+        possible_movements = [
+            move
+            for move in AVAILABLE_MOVEMENTS
+            if (
+                 position[0]+move[0] <= self.grid_size -1 and
+                 position[0]+move[0] >= 0 and
+                 position[1]+move[1] <= self.grid_size -1 and
+                 position[1]+move[1] >= 0 and
+                 self.grid[position[0]+move[0]][position[1]+move[1]] != MAPINFO.OBSTACLE
+            )
+        ]
 
         # Pick move according to smaller distance
         best_move = possible_movements[0]
@@ -176,25 +188,6 @@ class DroneSimulation:
             "best_distance": best_distance,
         })
         return best_move
-
-    def generate_random_move_list(
-        self,
-        start_position: Tuple[int, int],
-        target_position: Tuple[int, int]
-    ) -> List[Tuple[int, int]]:
-        move_list = []
-        current_position = start_position
-        MAX_MOVE_LIST_SIZE = 100
-
-        while current_position != target_position and len(move_list) < MAX_MOVE_LIST_SIZE:
-            best_move = self.get_best_move(
-                position=current_position,
-                target=target_position
-            )
-            move_list.append(best_move)
-            current_position = (current_position[0]+best_move[0],current_position[1]+best_move[1])
-
-        return move_list
 
     def calculate_fitness(self, move_list: List[Tuple[int, int]]) -> float:
         fitness = 0.0
@@ -234,6 +227,7 @@ class DroneSimulation:
             while True:
                 if not delivery_points:
                     break
+
                 delivery_points_distances = [
                     self.calculate_distance(
                         point1=current_position,
@@ -243,10 +237,15 @@ class DroneSimulation:
                 ]
                 delivery_points_with_distances = sorted(zip(delivery_points, delivery_points_distances), key=lambda x: x[1])
                 best_delivery_point = delivery_points_with_distances[0][0]
-                best_move = self.get_best_move(
-                    position=current_position,
-                    target=best_delivery_point
-                )
+
+                # Pick move based on distance
+                # best_move = self.get_best_move(
+                #     position=current_position,
+                #     target=best_delivery_point
+                # )
+
+                # Pick move randomly
+                best_move = self.get_random_move(position=current_position)
 
                 best_distance += self.calculate_distance(
                     point1=(current_position[0]+best_move[0], current_position[1]+best_move[1]),
