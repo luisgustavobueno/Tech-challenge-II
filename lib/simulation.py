@@ -11,6 +11,10 @@ class MOVE:
     DOWN = (0, 1)
     LEFT = (-1, 0)
     RIGHT = (1, 0)
+    BOTTOM_RIGHT = (1, 1)
+    BOTTOM_LEFT = (-1, 1)
+    TOP_LEFT = (-1, -1)
+    TOP_RIGHT = (1, -1)
     NEUTRAL = (0, 0)
 
 
@@ -70,6 +74,9 @@ class DroneSimulation:
             print(f'Delivered {found_index+1}° delivery point at {found_delivery_point}')
             print(f'Pending deliveries {self.delivery_points}')
 
+            if len(self.delivery_points) == 0:
+                raise Exception("Delivered everything!")
+
         self.grid[next_pos[0]][next_pos[1]] = MAPINFO.DRONE_POSITION
         self.grid[self.start_position[0]][self.start_position[1]] = MAPINFO.FREE_PATH
         print(f'Moving from {self.start_position} to {(self.start_position[0]+move[0],self.start_position[1]+move[1])}')
@@ -83,32 +90,22 @@ class DroneSimulation:
         screen.fill(WHITE, (WIDTH-299, 0, 300, HEIGHT))
 
         # Draw matrix
-        for route in self.population:
-            count = 1
-            for y in range(self.grid_size):
-                for x in range(self.grid_size):
-                    # print('route', route, '[x][y]', x, y)
-                    left = x * self.cell_size + 1
-                    top = y * self.cell_size + 1
-                    width = self.cell_size - 1
-                    height = self.cell_size - 1
-                    rect = pygame.Rect(left, top, width, height)
-                    if self.grid[x][y] == MAPINFO.OBSTACLE:
-                        pygame.draw.rect(screen, BLACK, rect)
-                        continue
+        for y in range(self.grid_size):
+            for x in range(self.grid_size):
+                left = x * self.cell_size + 1
+                top = y * self.cell_size + 1
+                width = self.cell_size - 1
+                height = self.cell_size - 1
+                rect = pygame.Rect(left, top, width, height)
+                if self.grid[x][y] == MAPINFO.OBSTACLE:
+                    pygame.draw.rect(screen, BLACK, rect)
+                    continue
 
-                    if self.grid[x][y] == MAPINFO.DESTINATION:
-                        pygame.draw.rect(screen, GREEN, rect)
-                        continue
+                if self.grid[x][y] == MAPINFO.DESTINATION:
+                    pygame.draw.rect(screen, GREEN, rect)
+                    continue
 
-                    if (x, y) in route:
-                        _c = BLUE
-                        _c.a = min(255, 10800 // count)
-                        count += 1
-                        pygame.draw.rect(screen, _c, rect)
-                        continue
-
-                    pygame.draw.rect(screen, WHITE, rect)
+                pygame.draw.rect(screen, WHITE, rect)
 
     def draw_drone(self, screen: pygame.Surface):
         # Draw drone
@@ -138,6 +135,10 @@ class DroneSimulation:
             MOVE.UP,
             MOVE.RIGHT,
             MOVE.DOWN,
+            # MOVE.TOP_LEFT,
+            # MOVE.TOP_RIGHT,
+            # MOVE.BOTTOM_LEFT,
+            # MOVE.BOTTOM_RIGHT,
         ]
         possible_movements = [
             move
@@ -151,6 +152,10 @@ class DroneSimulation:
             )
         ]
 
+        # Pick random possible move
+        return random.choice(possible_movements)
+
+        # Pick move according to smaller distance
         best_move = possible_movements[0]
         best_distance = self.calculate_distance(
             point1=(position[0]+best_move[0], position[1]+best_move[1]),
@@ -166,10 +171,10 @@ class DroneSimulation:
                 best_move = move
                 best_distance = distance
 
-        # print({
-        #     "best_move": best_move,
-        #     "best_distance": best_distance,
-        # })
+        print({
+            "best_move": best_move,
+            "best_distance": best_distance,
+        })
         return best_move
 
     def generate_random_move_list(
@@ -189,7 +194,6 @@ class DroneSimulation:
             move_list.append(best_move)
             current_position = (current_position[0]+best_move[0],current_position[1]+best_move[1])
 
-        print(move_list)
         return move_list
 
     def calculate_fitness(self, move_list: List[Tuple[int, int]]) -> float:
@@ -221,22 +225,37 @@ class DroneSimulation:
         population_distances = []
 
         while len(population) < population_size:
-            random_delivery_point = random.choice(self.delivery_points)
-
             current_position = self.start_position
             move_list = []
             best_distance = 0.0
 
-            while current_position != random_delivery_point:
+            delivery_points = self.delivery_points[:]
+
+            while True:
+                if not delivery_points:
+                    break
+                delivery_points_distances = [
+                    self.calculate_distance(
+                        point1=current_position,
+                        point2=point
+                    )
+                    for point in delivery_points
+                ]
+                delivery_points_with_distances = sorted(zip(delivery_points, delivery_points_distances), key=lambda x: x[1])
+                best_delivery_point = delivery_points_with_distances[0][0]
                 best_move = self.get_best_move(
                     position=current_position,
-                    target=random_delivery_point
+                    target=best_delivery_point
                 )
+
                 best_distance += self.calculate_distance(
                     point1=(current_position[0]+best_move[0], current_position[1]+best_move[1]),
-                    point2=random_delivery_point
+                    point2=best_delivery_point
                 )
                 current_position = (current_position[0]+best_move[0], current_position[1]+best_move[1])
+                if current_position == best_delivery_point:
+                    delivery_points.pop(delivery_points.index(best_delivery_point))
+
                 move_list.append(best_move)
 
             population.append(move_list)

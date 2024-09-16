@@ -1,4 +1,4 @@
-from random import choice, choices, randint
+from random import choices
 import sys
 import time
 from typing import List, Tuple
@@ -12,11 +12,11 @@ from simulation import DroneSimulation
 CELL_SIZE = 40
 GRID_SIZE = len(grid_default)
 
-POPULATION_SIZE = 3
-N_GENERATIONS = 100
+POPULATION_SIZE = 10
+N_GENERATIONS = 1000
 MUTATION_PROBABILITY = 0.5
 
-FPS = 5
+FPS = 1
 
 pygame.init()
 WIDTH = GRID_SIZE * CELL_SIZE + 300
@@ -67,14 +67,17 @@ while running:
     best_solutions.append(best_solution)
 
     # Generate new population
-    new_population = [best_solution]  # Keep the best individual: ELITISM
+    new_population = []  # Keep the best individual: ELITISM
 
     while len(new_population) < POPULATION_SIZE:
         # Selection - Pick at random
-        selected_a, selected_b = choices(population, k=2)
+        selected_a, selected_b = choices(
+            population,
+            k=2,
+            weights=[drone_simulation.calculate_fitness(p) for p in population]
+        )
 
         # Crossover
-        # path = selected_a[:]
         path = order_crossover(selected_a, selected_b)
         # path = two_point_crossover(selected_a, selected_b)
 
@@ -86,18 +89,16 @@ while running:
         #     path[index_to_mutate] = path[index_to_mutate+1]
         #     path[index_to_mutate+1] = aux
 
+        print('>', path)
         new_population.append(path)
 
     drone_simulation.population = new_population
-    for move in best_solution:
-        drone_simulation.move_drone_to(move)
+    drone_simulation.move_drone_to(new_population[0][0])
     drone_simulation.draw_routes(screen)
     drone_simulation.draw_drone(screen)
+    time.sleep(0.1)
     pygame.display.flip()
     clock.tick(FPS)
-
-    # remove this
-    # running = False
 
 pygame.quit()
 sys.exit()
