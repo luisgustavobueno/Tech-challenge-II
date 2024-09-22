@@ -11,7 +11,7 @@ NUM_GENERATIONS = 2000
 ELITISM_COUNT = 5
 CELL_SIZE = 40
 GRID_SIZE = 16
-SLEEP = 0
+SLEEP = 0.02
 
 # Definições de cores
 WHITE = (255, 255, 255)
@@ -162,7 +162,7 @@ def draw_grid(grid):
 
 # Função para mover o drone célula por célula até o destino
 def move_drone(route):
-    current_position = start_position
+    current_position = start_position.copy()
     grid = [row[:] for row in BASE_GRID]  # Copia da grid original
 
     for point in route:
