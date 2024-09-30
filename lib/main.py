@@ -140,7 +140,8 @@ def generate_population():
     population = []
     for _ in range(POP_SIZE):
         route = random.sample(delivery_points, len(delivery_points))
-        population.append(route)
+        if route not in population:
+          population.append(route)
     return population
 
 
