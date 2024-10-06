@@ -3,15 +3,17 @@ import numpy as np
 import pygame
 import time
 import math
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 # Configurações do Algoritmo Genético
 POP_SIZE = 100
 MUTATION_RATE = 0.8
-NUM_GENERATIONS = 5
+NUM_GENERATIONS = 100
 ELITISM_COUNT = 5
 CELL_SIZE = 40
 GRID_SIZE = 16
-SLEEP = 0.01
+SLEEP = 0.0
 
 # Definições de cores
 WHITE = (255, 255, 255)
@@ -21,7 +23,6 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 ORANGE = (255, 165, 0)
 
-
 # Constantes de movimentação
 OBSTACLE = 1
 DESTINATION = 2
@@ -30,7 +31,7 @@ FREE_PATH = 4
 
 # Inicialização do pygame
 pygame.init()
-screen = pygame.display.set_mode((GRID_SIZE * CELL_SIZE, GRID_SIZE * CELL_SIZE))
+screen = pygame.display.set_mode((GRID_SIZE * CELL_SIZE +500 , GRID_SIZE * CELL_SIZE))
 
 fix_grid_with_obstacle = [
     [0, 0, 0, 1, 0, 0, 0, 0],
@@ -95,6 +96,7 @@ fix_grid_with_obstacleII = [
 BASE_GRID = fix_grid_with_obstacleII
 delivery_points = []
 start_position = None
+best_fitness_values = []
 
 
 def calculate_distance(point1, point2):
@@ -163,6 +165,22 @@ def draw_grid(grid, target):
             pygame.draw.rect(screen, RED, rect, 1)
     pygame.display.flip()
 
+def draw_plot(screen: pygame.Surface, x: list, y: list, x_label: str = 'Generation', y_label: str = 'Fitness') -> None:
+    fig, ax = plt.subplots(figsize=(4, 4), dpi=100)
+    ax.plot(x, y)
+    ax.set_ylabel(y_label)
+    ax.set_xlabel(x_label)
+    plt.tight_layout()
+
+    canvas = FigureCanvasAgg(fig)
+    canvas.draw()
+    renderer = canvas.get_renderer()
+    raw_data = renderer.tostring_rgb()
+
+    size = canvas.get_width_height()
+    surf = pygame.image.fromstring(raw_data, size, "RGB")
+
+    screen.blit(surf, (GRID_SIZE * CELL_SIZE + 50, 50)) 
 
 def clamp_value(value, min_value, max_value):
     return max(min_value, min(value, max_value))
@@ -323,6 +341,10 @@ def main():
         print(
             f"Geração {generation}, melhor rota: {best_route}, fitness: {fitness}"
         )
+
+        best_fitness_values.append(fitness)
+
+        draw_plot(screen, list(range(len(best_fitness_values))), best_fitness_values, y_label="FItness - Distance")
 
         if fitness < best_fitness_global:
             best_fitness_global = fitness

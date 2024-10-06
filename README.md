@@ -18,6 +18,7 @@ Antes de executar o projeto, certifique-se de ter as seguintes dependências ins
 - Bibliotecas necessárias:
   - `pygame`
   - `numpy`
+  - `matplotlib`
 
 Você pode instalar as dependências usando o seguinte comando:
 
