@@ -1,5 +1,7 @@
 # Algoritmo Genético para Rotas de Drones
 
+[demo.webm](https://github.com/user-attachments/assets/992ed7c1-8600-43c8-9445-99620dd4266d)
+
 ## Introdução
 
 Este projeto implementa um algoritmo genético para encontrar a rota mais eficiente para um drone que precisa entregar pacotes em vários pontos de um grid. O algoritmo utiliza operações como seleção, crossover e mutação para otimizar a rota do drone, minimizando a distância percorrida entre os pontos de entrega. A simulação gráfica é feita usando a biblioteca Pygame.
@@ -23,7 +25,7 @@ Antes de executar o projeto, certifique-se de ter as seguintes dependências ins
 Você pode instalar as dependências usando o seguinte comando:
 
 ```bash
-pip install pygame numpy
+pip install -r requirements.txt
 ```
 
 ## Execução da Aplicação
