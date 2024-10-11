@@ -143,7 +143,7 @@ Esta função seleciona dois indivíduos da população e escolhe aquele com men
 
 ### 6. Função `crossover`
 
-Realiza o crossover entre dois pais para gerar um novo filho:
+Realiza o crossover ordenado (Ordered Crossover - OX) entre dois pais para gerar um novo filho:
 
 ```python
 def crossover(parent1, parent2):
