@@ -264,7 +264,30 @@ def draw_grid(grid, target):
 
 Essa função é responsável por renderizar a simulação gráfica no Pygame.
 
-### 10. Função `move_drone`
+### 10. Função `draw_plot`
+
+Desenha um gráfico de uma lista de valores (representando uma métrica como "Fitness" ao longo de gerações) e o exibe na interface gráfica do pygame.
+
+```python
+def draw_plot(screen: pygame.Surface, x: list, y: list, x_label: str = 'Generation', y_label: str = 'Fitness') -> None:
+    fig, ax = plt.subplots(figsize=(4, 4), dpi=100)
+    ax.plot(x, y)
+    ax.set_ylabel(y_label)
+    ax.set_xlabel(x_label)
+    plt.tight_layout()
+
+    canvas = FigureCanvasAgg(fig)
+    canvas.draw()
+    renderer = canvas.get_renderer()
+    raw_data = renderer.tostring_rgb()
+
+    size = canvas.get_width_height()
+    surf = pygame.image.fromstring(raw_data, size, "RGB")
+
+    screen.blit(surf, (GRID_SIZE * CELL_SIZE + 50, 50))
+```
+
+### 11. Função `move_drone`
 
 Move o drone célula por célula até o destino, considerando as rotas definidas:
 
@@ -284,7 +307,9 @@ def move_drone(route):
 
 O drone é movido conforme a rota definida pela melhor solução encontrada pelo algoritmo genético.
 
-### 11. Função Principal `main`
+<div class="page" />
+
+### 12. Função Principal `main`
 
 Executa o algoritmo genético, gerando rotas, selecionando os melhores indivíduos e movendo o drone:
 
@@ -310,8 +335,6 @@ def main():
 
     pygame.quit()
 ```
-
-<div class="page" />
 
 ## Estrutura do Algoritmo Genético
 
