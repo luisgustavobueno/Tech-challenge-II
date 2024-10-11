@@ -1,3 +1,53 @@
+# Tech Challenge <02>
+
+### Curso
+
+Pós graduação em IA para Devs
+
+### Grupo 2
+
+- Julio Cesar Scheidt Santos (julio.scheidt96@gmail.com)
+- Julio Cesario de Paiva Leão (julio0023@live.com)
+- Luis Gustavo Bueno Colombo (luisgustavobuenocolombo@gmail.com)
+- Paulo Ubirajara de Mattos Neto (pauloubirajaraneto@hotmail.com)
+
+### URLs importantes
+
+ - [Vídeo apresentando a aplicação](https://www.youtube.com/watch?v=YVRX9W8XzXg)
+ - [Repositório do projeto no GitHub](https://github.com/luisgustavobueno/Tech-challenge-II)
+
+### Começando
+
+Clone o projeto para sua máquina:
+
+```bash
+git clone https://github.com/luisgustavobueno/Tech-challenge-II.git
+cd Tech-challenge-II
+```
+
+Instale as depedências:
+
+> Recomendamos utilizar um ambiente virtual (venv) para instalar as dependências do projeto.
+
+```bash
+pip install -r requirements.txt
+```
+
+E execute a aplicação:
+
+```bash
+python main.py
+```
+
+### Desafio
+
+O desafio consiste em projetar, implementar e testar um sistema que
+utilize Algoritmos Genéticos para otimizar uma função ou resolver um problema
+complexo de otimização. Você pode escolher problemas como otimização de
+rotas, alocação de recursos e design de redes neurais.
+
+<div class="page" />
+
 # Algoritmo Genético para Rotas de Drones
 
 [demo.webm](https://github.com/user-attachments/assets/992ed7c1-8600-43c8-9445-99620dd4266d)
@@ -65,6 +115,8 @@ SLEEP = 0.01
 ### 2. Definição do `BASE_GRID`
 
 O `BASE_GRID` é uma matriz que representa o grid no qual o drone se move. Cada célula da matriz tem um valor específico que pode representar um obstáculo, uma célula livre, a posição do drone, ou a posição dos destinos de entrega.
+
+<div class="page" />
 
 #### Exemplo de Definição do Grid:
 
@@ -156,6 +208,8 @@ def crossover(parent1, parent2):
 ```
 
 O crossover combina genes (pontos de entrega) de dois pais para criar uma nova rota.
+
+<div class="page" />
 
 ### 7. Função `mutate`
 
@@ -256,6 +310,8 @@ def main():
 
     pygame.quit()
 ```
+
+<div class="page" />
 
 ## Estrutura do Algoritmo Genético
 
