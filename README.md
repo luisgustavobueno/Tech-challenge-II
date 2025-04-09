@@ -6,10 +6,9 @@ Pós graduação em IA para Devs
 
 ### Grupo 2
 
-- Julio Cesar Scheidt Santos (julio.scheidt96@gmail.com)
+
 - Julio Cesario de Paiva Leão (julio0023@live.com)
 - Luis Gustavo Bueno Colombo (luisgustavobuenocolombo@gmail.com)
-- Paulo Ubirajara de Mattos Neto (pauloubirajaraneto@hotmail.com)
 
 ### URLs importantes
 
